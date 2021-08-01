@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-data
+spec:
+  selector:
+    matchLabels:
+      component: elasticsearch
+  serviceName: elasticsearch
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: es-data
+        image: ajkumar4/elasticsearch:7.13.4
+        env:
+        - name: node.max_local_storage_nodes
+          value: "3"
+        envFrom:
+        - configMapRef:
+            name: es-config
+        resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"

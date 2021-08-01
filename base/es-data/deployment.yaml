@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-data
+  labels:
+    component: elasticsearch
+    role: data
+spec:
+  selector:
+    matchLabels:
+      component: elasticsearch
+  serviceName: elasticsearch-data
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        component: elasticsearch
+        role: data
+    spec:
+      containers:
+      - name: es-data
+        image: ajkumar4/elasticsearch:7.13.4
+        env:
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: node.roles
+          value: "data"
+        - name: discovery.seed_hosts
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['component']
+        resources:
+          limits:
+            cpu: 512m
+            memory: 1Gi
+        ports:
+        - containerPort: 9300
+          name: transport
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+      volumes:
+        - name: es-data
+          hostPath:
+            path: /elasticsearch/data
+            type: DirectoryOrCreate

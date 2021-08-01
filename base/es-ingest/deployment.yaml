@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-ingest
+  labels:
+    component: elasticsearch
+    role: ingest
+spec:
+  selector:
+    matchLabels:
+      component: elasticsearch
+  serviceName: elasticsearch
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: elasticsearch
+        role: ingest
+    spec:
+      containers:
+      - name: es-ingest
+        image: ajkumar4/elasticsearch:7.13.4
+        env:
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: node.roles
+          value: "ingest, remote_cluster_client"
+        - name: discovery.seed_hosts
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['component']
+        - name: node.attr.connector.jdbc
+          value: "true"
+        resources:
+          limits:
+            cpu: 512m
+            memory: 1Gi
+        ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9300
+          name: transport
+        volumeMounts:
+        - name: storage
+          mountPath: /data
+      volumes:
+          - emptyDir:
+              medium: ""
+            name: storage

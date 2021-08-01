@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-master
+  labels:
+    component: elasticsearch
+    role: master
+spec:
+  selector:
+    matchLabels:
+      component: elasticsearch
+  serviceName: elasticsearch-discovery
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        component: elasticsearch
+        role: master
+    spec:
+      containers:
+      - name: es-master
+        image: ajkumar4/elasticsearch:7.13.4
+        env:
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: node.roles
+          value: "master"
+        - name: discovery.seed_hosts
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['component']
+        resources:
+          limits:
+            cpu: 512m
+            memory: 1Gi
+        ports:
+        - containerPort: 9300
+          name: transport
+        volumeMounts:
+        - name: storage
+          mountPath: /data
+      volumes:
+          - emptyDir:
+              medium: ""
+            name: "storage"

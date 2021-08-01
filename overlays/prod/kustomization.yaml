@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: elasticsearch
+
+bases:
+  - ../../base
+
+resources:
+  - config.yaml
+
+patchesStrategicMerge:
+  - es-coordinator/deployment.yaml
+  - es-data/deployment.yaml
+  - es-ingest/deployment.yaml
+  - es-master/deployment.yaml

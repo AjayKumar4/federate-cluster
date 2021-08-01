@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-coordinator
+spec:
+  selector:
+    matchLabels:
+      component: elasticsearch
+  serviceName: elasticsearch
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: es-coordinator
+        image: ajkumar4/elasticsearch:7.13.4
+        envFrom:
+        - configMapRef:
+            name: es-config
+        resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
